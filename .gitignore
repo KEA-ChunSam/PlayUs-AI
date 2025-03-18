@@ -131,7 +131,10 @@ celerybeat.pid
 .env
 .venv
 env/
-venv/
+venv/__pycache__/
+venv/Lib/site-packages/
+venv/scripts/
+venv/pyvenv.cfg
 ENV/
 env.bak/
 venv.bak/
