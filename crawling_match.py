@@ -7,7 +7,7 @@ import pymysql
 import time
 import datetime
 import logging
-
+import os
 # 로깅 설정
 logging.basicConfig(
     filename='kbo_crawler.log',
@@ -28,12 +28,12 @@ driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 10)
 
 conn = pymysql.connect(
-    host='${DB_URL}',
-    user='${DB_USER}',
-    password='${DB_PASSWORD}',
-    db='${DB_NAME}',
-    charset='utf8'
-)
+	    host=os.getenv("DB_URL"),
+	    user=os.getenv("DB_USER"),
+	    password=os.getenv("DB_PASSWORD"),
+	    db=os.getenv("DB_NAME"),
+	    charset='utf8'
+	)
 cursor = conn.cursor()
 
 team_map = {
