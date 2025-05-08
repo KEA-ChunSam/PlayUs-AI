@@ -12,8 +12,8 @@ body:
         제목은 반드시 `Chore/ ~` 형식으로 작성해주세요.  
         예: `Chore/멀티모듈 SW 아키텍처 설계`
 
-  - type : input
-    id : parentKey
+  - type: input
+    id: parentKey
     attributes:
       label: '상위 작업 (Epic, 보라색 번개) Ticket Number'
       description: '상위 직업 (Epic, 보라색 아이콘) 의 Ticket Number를 기입해주세요, 노션에서도 확인 가능'
