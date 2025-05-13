@@ -111,7 +111,7 @@ for teamId, (code, teamName) in enumerate(teams.items(), start=1):
         try:
             cursor.execute("""
                 INSERT INTO hitter_info
-                    (id, name, avg, G, PA, AB, R, H, `2B`, `3B`, HR, RBI, SAC, SF, teamID, season)
+                    (id, name, avg, G, PA, AB, R, H, `2B`, `3B`, HR, RBI, SAC, SF, team_id, season)
                 VALUES
                     (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
