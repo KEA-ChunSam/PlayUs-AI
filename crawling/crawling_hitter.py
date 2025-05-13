@@ -1,4 +1,5 @@
 import logging
+import re
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
@@ -7,8 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import pymysql
-import time
 import os
+import time
 
 # 로깅 기본 설정
 logging.basicConfig(
@@ -37,6 +38,10 @@ def extractPlayers(driver):
             continue
 
         try:
+            # 선수 ID 추출 (프로필 링크에서 추출)
+            profile_link = cols[1].find("a")["href"]
+            player_id = int(re.search(r'(\d+)', profile_link).group(1))
+
             name = cols[1].text.strip()
             avgText = cols[3].text.strip()
             avg = None if avgText == '-' else float(avgText)
@@ -47,7 +52,7 @@ def extractPlayers(driver):
                 cols[13].text, cols[14].text, cols[15].text
             ]))
 
-            players.append((name, avg, *data))
+            players.append((player_id, name, avg, *data))
         except Exception as e:
             logging.error(f"에러 발생: {e}")
             continue
@@ -76,10 +81,12 @@ time.sleep(2)
 # 팀별 크롤링
 for teamId, (code, teamName) in enumerate(teams.items(), start=1):
     logging.info(f"크롤링 중: {teamName} (teamID: {teamId})")
+    
     # 시즌 선택
     seasonSelect = Select(driver.find_element(By.ID, "cphContents_cphContents_cphContents_ddlSeason_ddlSeason"))
     seasonSelect.select_by_value(season)
     time.sleep(5)
+    
     # 팀 선택
     teamSelect = Select(driver.find_element(By.ID, "cphContents_cphContents_cphContents_ddlTeam_ddlTeam"))
     teamSelect.select_by_value(code)
@@ -99,19 +106,19 @@ for teamId, (code, teamName) in enumerate(teams.items(), start=1):
         logging.warning(f"페이지 2 없음 또는 클릭 실패: {e}")
         pass
     
-    # DB 저장 (복합키로 upsert)
+    # DB 저장
     for p in players:
         try:
             cursor.execute("""
                 INSERT INTO hitter_info
-                    (name, avg, G, PA, AB, R, H, `2B`, `3B`, HR, RBI, SAC, SF, teamID, season)
+                    (id, name, avg, G, PA, AB, R, H, `2B`, `3B`, HR, RBI, SAC, SF, teamID, season)
                 VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
                     avg=VALUES(avg), G=VALUES(G), PA=VALUES(PA), AB=VALUES(AB), R=VALUES(R),
                     H=VALUES(H), `2B`=VALUES(`2B`), `3B`=VALUES(`3B`), HR=VALUES(HR),
                     RBI=VALUES(RBI), SAC=VALUES(SAC), SF=VALUES(SF)
-            """, (*p, teamId, int(season)))
+            """, (p[0], p[1], p[2], *p[3:], teamId, int(season)))
         except Exception as e:
             logging.error(f"DB 저장 에러: {e}")
 
