@@ -124,17 +124,19 @@ for year in years:
 
                     # MySQL에 삽입
                     try:
-                        if away_score is not None and home_score is not None:
-                            cursor.execute("""
-                                INSERT INTO matches (home_team_id, away_team_id, match_date, created_at, home_score, away_score, start_time)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            """, (home_team_id, away_team_id, current_date, datetime.datetime.now(), home_score, away_score, time_info))
-                        else:
-                            cursor.execute("""
-                                INSERT INTO matches (home_team_id, away_team_id, match_date, created_at, start_time)
-                                VALUES (%s, %s, %s, %s, %s)
-                            """, (home_team_id, away_team_id, current_date, datetime.datetime.now(), time_info))
+                        cursor.execute("""
+                            INSERT INTO matches 
+                                (home_team_id, away_team_id, match_date, created_at, home_score, away_score, start_time)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE
+                                home_score = VALUES(home_score),
+                                away_score = VALUES(away_score),
+                                start_time = VALUES(start_time),
+                                updated_at = NOW()
+                        """, (home_team_id, away_team_id, current_date, datetime.datetime.now(), home_score, away_score, time_info))
+
                         conn.commit()
+        
                         logging.info(f"경기 저장 완료: {current_date} {time_info} {away_team} vs {home_team} ({away_score}, {home_score})")
                     except Exception as e:
                         logging.error(f"[{year}년 {month}월] DB 오류: {e}", exc_info=True)

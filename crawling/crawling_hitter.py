@@ -29,7 +29,15 @@ teams = {
 def extractPlayers(driver):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     table = soup.find("table", {"class": "tData01 tt"})
+    if table is None:
+        logging.error("통계 테이블을 찾지 못했습니다.")
+        return []
+
     tbody = table.find("tbody")
+    if tbody is None:
+        logging.error("테이블 본문(tbody)을 찾지 못했습니다.")
+        return []
+    
     players = []
 
     for row in tbody.find_all("tr"):
@@ -46,11 +54,14 @@ def extractPlayers(driver):
             avgText = cols[3].text.strip()
             avg = None if avgText == '-' else float(avgText)
 
-            data = list(map(lambda x: int(x.replace(",", "")) if x.strip() else 0, [
-                cols[4].text, cols[5].text, cols[6].text, cols[7].text,
-                cols[8].text, cols[9].text, cols[10].text, cols[11].text,
-                cols[13].text, cols[14].text, cols[15].text
-            ]))
+            def _to_int(text: str) -> int:
+                text = text.strip().replace(",", "")
+                return int(text) if text.isdigit() else 0
+            data = list(map(_to_int, [
+                 cols[4].text, cols[5].text, cols[6].text, cols[7].text,
+                 cols[8].text, cols[9].text, cols[10].text, cols[11].text,
+                 cols[13].text, cols[14].text, cols[15].text
+             ]))
 
             players.append((player_id, name, avg, *data))
         except Exception as e:

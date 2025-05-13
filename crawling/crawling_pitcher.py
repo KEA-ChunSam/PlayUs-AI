@@ -48,10 +48,12 @@ def extract_players(driver):
             ip = convert_ip(cols[10].text.strip())
             
             # 숫자 데이터 추출
-            data = [
-                int(cols[i].text.strip().replace(",", "") or 0)
-                for i in [4,5,6,8,11,12,13,14,15,16,17]
-            ]
+            def _safe_int(text: str) -> int:
+                t = text.strip().replace(",", "")
+                return int(t) if t.isdigit() else 0
+
+            data = [_safe_int(cols[i].text) for i in
+            [4, 5, 6, 8, 11, 12, 13, 14, 15, 16, 17]]
             
             # WHIP 처리
             whip = float(cols[18].text.strip()) if cols[18].text.strip() != '-' else None
@@ -66,7 +68,7 @@ def extract_players(driver):
 
 def convert_ip(ip_str):
     """이닝(IP) 값을 소수로 변환 (예: 19 1/3 → 19.333)"""
-    if not ip_str:
+    if not ip_str or ip_str == '-':
         return 0.0
     parts = ip_str.split()
     total = 0.0
