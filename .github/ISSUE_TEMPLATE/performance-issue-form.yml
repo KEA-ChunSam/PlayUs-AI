@@ -1,15 +1,22 @@
-name: 'AI Github-Jira 이슈 생성'
-description: '이슈 생성 폼'
-title : '이슈를 작성해주세요'
-labels : []
+name: '⚡ performance'
+description: '성능 개선 이슈 템플릿'
+title : 'Performance/이슈를 작성해주세요'
+labels : [⚡ performance]
 assignees : ['지석']
 
 body:
-  - type : input
-    id : parentKey
+  - type: markdown
     attributes:
-      label: '상위 작업 Ticket Number'
-      description: '상위 직업 (Story/Epic) 의 Ticket Number를 기입해주세요, 노션에서 확인 가능'
+      value: |
+        ### 📝 제목 작성 규칙
+        제목은 반드시 `Performance/ ~` 형식으로 작성해주세요.  
+        예: `Performance/A 기능 성능 개선`
+
+  - type: input
+    id: parentKey
+    attributes:
+      label: '상위 작업 (Epic, 보라색 번개) Ticket Number'
+      description: '상위 직업 (Epic, 보라색 아이콘) 의 Ticket Number를 기입해주세요, 노션에서도 확인 가능'
       value: CS-00
     validations:
       required: true
@@ -22,13 +29,11 @@ body:
     validations:
       required: true
 
-#  - type: input
-#    id: name
-#    attributes:
-#      label: '담당자 이름'
-#      description: '이슈를 맡는 담당자에 대해 이야기해주세요.'
-#    validations:
-#      required: true
+  - type: input
+    id: name
+    attributes:
+      label: '담당자 이름'
+      description: '이슈를 맡는 담당자에 대해 이야기해주세요.'
 
   - type : textarea
     id : details

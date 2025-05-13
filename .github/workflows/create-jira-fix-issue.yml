@@ -1,22 +1,15 @@
-name: Create Jira issue
+name: Create Jira Fix Issue
 on:
   issues:
     types:
       - opened
 
-env:
-  ISSUE_HEADER : "[AI]"
-
 jobs:
   create-issue:
-    name: Create Jira issue
+    if : "startsWith(github.event.issue.title, 'Fix')"
+    name: Create Jira issue # Jira Login
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main code
-        uses: actions/checkout@v4
-        with:
-          ref: main
-
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
@@ -24,11 +17,16 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
+      - name: Checkout default branch code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
         id: issue-parser
         with:
-          template-path: .github/ISSUE_TEMPLATE/issue_form.yml
+          template-path: .github/ISSUE_TEMPLATE/fix-issue-form.yml # issue template path
 
       - name: Log Issue Parser
         run: |
@@ -50,8 +48,8 @@ jobs:
         uses: atlassian/gajira-create@v3
         with:
           project: CS # JIRA KEY
-          issuetype: 하위 작업
-          summary: "${{env.ISSUE_HEADER}} ${{ github.event.issue.title }}"
+          issuetype: Task
+          summary: "${{ github.event.issue.title }}"
           description: "${{ steps.md2jira.outputs.output-text }}"
           fields: |
             {
@@ -60,20 +58,26 @@ jobs:
               }
             }
 
-      - name: Log created issue
-        run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
+      - name : Change Jira Issue transition
+        uses : atlassian/gajira-transition@v3
+        with :
+          issue : ${{steps.create.outputs.issue}}
+          transition : "진행 중"
 
-      - name: Checkout develop code
+      - name: Log created issue
+        run: echo "Jira Issue ${{ steps.issue-parser.outputs.issueparser_parentKey }}/${{ steps.create.outputs.issue }} was created"
+
+      - name: Checkout dev code
         uses: actions/checkout@v4
         with:
           ref: dev
 
       - name: Create branch with Ticket number
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          ISSUE_TITLE="${{github.event.issue.title}}"
           SAFE_TITLE=$(echo "$ISSUE_TITLE" | sed 's/ /_/g')
-          BRANCH_NAME="${{steps.create.outputs.issue}}_${SAFE_TITLE}"
-          
+          BRANCH_NAME="${{ steps.create.outputs.issue }}_${SAFE_TITLE}"
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
 
