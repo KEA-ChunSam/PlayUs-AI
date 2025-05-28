@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import pymysql
 import time
 import os
-
+from utils.db import get_db_config
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -77,14 +77,16 @@ def convert_ip(ip_str):
     return round(total, 3)
 
 
+config = get_db_config()
 conn = pymysql.connect(
-	    host="129.154.50.74",  
-        port=3306,              
-        user="root",       
-        password="1234",    
-        db="match_dev",
-	    charset='utf8'
-	)
+    host=config['host'],
+    port=config['port'],
+    user=config['user'],
+    password=config['password'],
+    db=config['database'],  
+    charset=config['charset']
+)
+
 cursor = conn.cursor()
 
 # 크롬 설정

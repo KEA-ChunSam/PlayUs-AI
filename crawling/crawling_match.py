@@ -9,6 +9,7 @@ import datetime
 import logging
 import os
 import datetime
+from utils.db import get_db_config
 # 로깅 설정
 logging.basicConfig(
     filename='kbo_crawler12.log',
@@ -28,14 +29,16 @@ options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
 wait = WebDriverWait(driver, 10)
 
+config = get_db_config()
 conn = pymysql.connect(
-	    host="129.154.50.74",  
-        port=3306,              
-        user="root",       
-        password="1234",    
-        db="match_dev",
-	    charset='utf8'
-	)
+    host=config['host'],
+    port=config['port'],
+    user=config['user'],
+    password=config['password'],
+    db=config['database'],  # 'database' 키 사용 (db 대신)
+    charset=config['charset']
+)
+
 cursor = conn.cursor()
 
 team_map = {
