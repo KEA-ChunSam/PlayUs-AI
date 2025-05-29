@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import pymysql
 import time
 import os
-
+from utils.db import get_db_config
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -34,31 +34,27 @@ def extract_players(driver):
 
     for row in tbody.find_all("tr"):
         cols = row.find_all("td")
-        if len(cols) < 19:  # 컬럼 개수 확인
+        if len(cols) < 19:
             continue
 
         try:
-            # 선수 ID 추출
             profile_link = cols[1].find("a")["href"]
             player_id = int(re.search(r'(\d+)$', profile_link).group(1))
-
-            # 기본 정보 추출
             name = cols[1].text.strip()
             era = float(cols[3].text.strip()) if cols[3].text.strip() != '-' else None
             ip = convert_ip(cols[10].text.strip())
-            
-            # 숫자 데이터 추출
+
             def _safe_int(text: str) -> int:
                 t = text.strip().replace(",", "")
                 return int(t) if t.isdigit() else 0
 
             data = [_safe_int(cols[i].text) for i in
-            [4, 5, 6, 8, 11, 12, 13, 14, 15, 16, 17]]
+                    [4, 5, 6, 8, 11, 12, 13, 14, 15, 16, 17]]
             
-            # WHIP 처리
             whip = float(cols[18].text.strip()) if cols[18].text.strip() != '-' else None
+            wpct = float(cols[9].text.strip()) if cols[9].text.strip() != '-' else None
 
-            players.append((player_id, name, era, ip, whip, *data))
+            players.append((player_id, name, era, ip, whip, *data[:4], wpct, *data[4:]))
             
         except Exception as e:
             logging.error(f"행 처리 오류: {str(e)}")
@@ -80,14 +76,17 @@ def convert_ip(ip_str):
             total += float(part)
     return round(total, 3)
 
-# DB 연결
+
+config = get_db_config()
 conn = pymysql.connect(
-	    host=os.getenv("DB_URL"),
-	    user=os.getenv("DB_USER"),
-	    password=os.getenv("DB_PASSWORD"),
-	    db=os.getenv("DB_NAME"),
-	    charset='utf8'
-	)
+    host=config['host'],
+    port=config['port'],
+    user=config['user'],
+    password=config['password'],
+    db=config['database'],  
+    charset=config['charset']
+)
+
 cursor = conn.cursor()
 
 # 크롬 설정
@@ -112,7 +111,7 @@ for team_id, (code, team_name) in enumerate(teams.items(), start=1):
     team_select = Select(driver.find_element(By.ID, "cphContents_cphContents_cphContents_ddlTeam_ddlTeam"))
     team_select.select_by_value(code)
     time.sleep(3)
-
+    
     # 데이터 추출
     pitchers = extract_players(driver)
 
@@ -132,11 +131,11 @@ for team_id, (code, team_name) in enumerate(teams.items(), start=1):
             cursor.execute("""
                 INSERT INTO pitcher_info (
                     id, name, era, ip, whip,
-                    g, w, l, hld, h, hr, bb, hbp, so, r, er,
+                    g, w, l, hld, wpct,h, hr, bb, hbp, so, r, er,
                     team_id, season
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s,  %s, %s, 
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
                     era=VALUES(era),
                     ip=VALUES(ip),
@@ -145,6 +144,7 @@ for team_id, (code, team_name) in enumerate(teams.items(), start=1):
                     w=VALUES(w),
                     l=VALUES(l),
                     hld=VALUES(hld),
+                    wpct=VALUES(wpct),
                     h=VALUES(h),
                     hr=VALUES(hr),
                     bb=VALUES(bb),

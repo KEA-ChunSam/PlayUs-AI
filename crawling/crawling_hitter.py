@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import pymysql
 import os
 import time
-
+from utils.db import get_db_config
 # 로깅 기본 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -57,6 +57,7 @@ def extractPlayers(driver):
             def _to_int(text: str) -> int:
                 text = text.strip().replace(",", "")
                 return int(text) if text.isdigit() else 0
+            
             data = list(map(_to_int, [
                  cols[4].text, cols[5].text, cols[6].text, cols[7].text,
                  cols[8].text, cols[9].text, cols[10].text, cols[11].text,
@@ -70,14 +71,16 @@ def extractPlayers(driver):
 
     return players
 
-# DB 연결
+config = get_db_config()
 conn = pymysql.connect(
-	    host=os.getenv("DB_URL"),
-	    user=os.getenv("DB_USER"),
-	    password=os.getenv("DB_PASSWORD"),
-	    db=os.getenv("DB_NAME"),
-	    charset='utf8'
-	)
+    host=config['host'],
+    port=config['port'],
+    user=config['user'],
+    password=config['password'],
+    db=config['database'],  # 'database' 키 사용 (db 대신)
+    charset=config['charset']
+)
+
 cursor = conn.cursor()
 
 # 크롬 설정
