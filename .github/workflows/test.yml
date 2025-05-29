@@ -6,20 +6,16 @@ on:
       - dev
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file from secrets
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
-
       - name: Set up Python
         uses: actions/setup-python@v5
-        with: 
+        with:
           python-version: '3.10.15'
 
       - name: Cache dependencies
@@ -28,7 +24,28 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
 
-      - name: Install dependencies and run tests
+      - name: Create .env file from secrets
         run: |
-          pip install -r requirements.txt
-          pytest --maxfail=1 --disable-warnings -q
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "."
+          target: "~/fastapi-test"
+
+      - name: Install dependencies and run FastAPI with nohup
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/fastapi-test
+            python3 -m pip install --upgrade pip
+            python3 -m pip install -r requirements.txt
+            pytest --maxfail=1 --disable-warnings -q
+          
