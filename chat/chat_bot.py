@@ -1,5 +1,6 @@
 import re
 import logging
+
 from utils.model import text_gen_pipeline
 from langchain_huggingface import HuggingFacePipeline
 from utils.db import get_sqlalchemy_engine
