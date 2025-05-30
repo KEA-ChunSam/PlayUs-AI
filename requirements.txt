@@ -7,7 +7,5 @@ pymysql
 torch
 transformers
 selenium 
-pytest
-httpx
 accelerate
 langchain_huggingface
