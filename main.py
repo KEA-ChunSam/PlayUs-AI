@@ -1,20 +1,20 @@
-import sentry_sdk
-import os
-import torch
-import re
 import json
-
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
+import os
+import re
 from typing import List
-from utils.model import generate_simulation_result, detect_profanity
-from utils.db import get_hitter_info_by_id, get_pitcher_info_by_id
-from chat.chat_bot import ask_question
-from simulation.simulate import simulate_game_rag
+
+import sentry_sdk
+import torch
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from config.config import settings
-from utils.slack import send_slack_message
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from chat.chat_bot import ask_question
+from config.config import settings
+from simulation.simulate import simulate_game_rag
+from utils.model import detect_profanity
+from utils.slack import send_slack_message
 
 
 class UnicornException(Exception):
