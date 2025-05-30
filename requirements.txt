@@ -10,3 +10,4 @@ selenium
 accelerate
 langchain_huggingface
 langgraph
+sentry-sdk[fastapi]
