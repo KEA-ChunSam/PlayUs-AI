@@ -28,17 +28,7 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          port: ${{ secrets.SERVER_PORT }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."
-          target: "~/fastapi-test"
-
-      - name: Install dependencies and run FastAPI with nohup
+      - name: Run Test
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -46,8 +36,6 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/fastapi-test
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements.txt
-            pytest --maxfail=1 --disable-warnings -q
+            ~/test.sh
+        
           
