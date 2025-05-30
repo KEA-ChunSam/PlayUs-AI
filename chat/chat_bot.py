@@ -1,8 +1,12 @@
 import re
+import logging
+
 from utils.model import text_gen_pipeline
 from langchain_huggingface import HuggingFacePipeline
 from utils.db import get_sqlalchemy_engine
 from sqlalchemy import text
+
+logger = logging.getLogger(__name__)
 
 # 1. DB 엔진 및 LLM 래핑
 engine = get_sqlalchemy_engine()
@@ -135,9 +139,9 @@ SQL 쿼리: {sql}
 # 5. 전체 파이프라인 함수
 def ask_question(question: str) -> str:
     sql = get_sql_query_from_llm(question)
-    print("LLM이 만든 쿼리:", sql)
+    logger.debug("LLM이 만든 쿼리: %s", sql)
     result = run_sql(sql)
-    print("쿼리 결과:", result)
+    logger.debug("쿼리 결과: %s", result)
     answer = get_natural_answer_from_llm(question, sql, result)
     return answer
 
