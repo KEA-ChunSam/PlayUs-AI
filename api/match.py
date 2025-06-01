@@ -1,45 +1,60 @@
 import requests
 from utils.db import get_stadium_by_team_name, get_team_id_by_name, get_match_id_by_teams_and_date
 
-def get_match_info_by_date(date: str):
-    url = f"https://api-gw.sports.naver.com/schedule/games?fields=basic%2Cschedule%2Cbaseball&upperCategoryId=kbaseball&fromDate={date}&toDate={date}&size=500"
-    response = requests.get(url)
+def get_match_info_by_date(date: str) -> List[Dict[str, Any]]:
+    base_url = "https://api-gw.sports.naver.com/schedule/games"
+    params = {
+        "fields": "basic,schedule,baseball",
+        "upperCategoryId": "kbaseball",
+        "fromDate": date,
+        "toDate": date,
+        "size": 500
+    }
+    
+    response = requests.get(base_url, params=params, timeout=10)
     if response.status_code == 200:
         data = response.json()
         games = data.get('result', {}).get('games', [])
-        result = []
-        for game in games:
-            if game.get('categoryName') == 'KBO리그':
-                game_date_time =  game.get('gameDateTime')
-                home_team_name = game.get('homeTeamName')
-                away_team_name = game.get('awayTeamName')
-                stadium = get_stadium_by_team_name(home_team_name)
-                home_team_id = get_team_id_by_name(home_team_name)
-                away_team_id = get_team_id_by_name(away_team_name)
-                match_id = get_match_id_by_teams_and_date(home_team_id, away_team_id, game_date_time)
-                naver_game_id = game.get('gameId')
-                home_team_score = game.get('homeTeamScore')
-                away_team_score = game.get('awayTeamScore')
-                status_code = game.get('statusCode')
-                winner = game.get('winner')
-
-                result.append({
-                    'match_id': match_id,
-                    'naver_game_id': naver_game_id,
-                    'game_date_time': game_date_time,
-                    'stadium': stadium,
-                    'home_team_id': home_team_id,
-                    'home_team_name': home_team_name,
-                    'home_team_score': home_team_score,
-                    'away_team_id': away_team_id,
-                    'away_team_name': away_team_name,
-                    'away_team_score': away_team_score,
-                    'status_code': status_code,
-                    'winner': winner,
-                })
-        return result
-    else:
-        response.raise_for_status()
+        return [
+            _process_game_info(game)
+            for game in games
+            if game.get('categoryName') == 'KBO리그'
+        ]
+    
+    response.raise_for_status()
+    
+def _process_game_info(game: Dict[str, Any]) -> Dict[str, Any]:
+    # 게임 정보를 처리하여 필요한 형태로 변환
+    home_team_name = game.get('homeTeamName')
+    away_team_name = game.get('awayTeamName')
+    game_date_time = game.get('gameDateTime')
+    
+    # 데이터베이스에서 추가 정보 조회
+    stadium = get_stadium_by_team_name(home_team_name)
+    home_team_id = get_team_id_by_name(home_team_name)
+    away_team_id = get_team_id_by_name(away_team_name)
+    
+    # None 값 체크 및 경기 ID 조회
+    match_id = None
+    if home_team_id and away_team_id and game_date_time:
+        match_id = get_match_id_by_teams_and_date(
+            home_team_id, away_team_id, game_date_time
+        )
+    
+    return {
+        'match_id': match_id,
+        'naver_game_id': game.get('gameId'),
+        'game_date_time': game_date_time,
+        'stadium': stadium,
+        'home_team_id': home_team_id,
+        'home_team_name': home_team_name,
+        'home_team_score': game.get('homeTeamScore'),
+        'away_team_id': away_team_id,
+        'away_team_name': away_team_name,
+        'away_team_score': game.get('awayTeamScore'),
+        'status_code': game.get('statusCode'),
+        'winner': game.get('winner'),
+    }
 
 def get_match_preview_info(game_id):
     url = f"https://api-gw.sports.naver.com/schedule/games/{game_id}/preview"
