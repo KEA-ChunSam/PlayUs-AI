@@ -5,9 +5,9 @@ from config.config import settings
 # Llama-3.1-8B 최적화된 양자화 설정
 quantization_config = BitsAndBytesConfig(
     load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",           # NF4 양자화 (더 정확함)
-    bnb_4bit_compute_dtype=torch.bfloat16, # 계산 시 bfloat16 사용
-    bnb_4bit_use_double_quant=True,      # 이중 양자화로 메모리 더 절약
+    bnb_4bit_quant_type="nf4",           # NF4 양자화 
+    bnb_4bit_compute_dtype=torch.bfloat16, 
+    bnb_4bit_use_double_quant=True,      
 )
 
 # 토크나이저 로드 (Llama-3.1 최적화)
@@ -27,7 +27,7 @@ model = AutoModelForCausalLM.from_pretrained(
     attn_implementation="flash_attention_2"  # Flash Attention으로 속도 향상
 )
 
-# torch.compile은 양자화된 모델과 호환성 문제가 있을 수 있음
+
 try:
     if not hasattr(model, 'quantization_config'):
         model = torch.compile(model, mode="reduce-overhead")

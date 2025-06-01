@@ -13,6 +13,22 @@ class Settings(BaseSettings):
     
     # 기타 설정
     hf_token: str
+
+    # Sentry 및 Slack 환경 변수
+    sentry_repository_dsn: str
+    sentry_environment: str
+    sentry_servername: str
+    sentry_repository_uri: str
+    slack_webhook_url: str
+
+    # JWT 설정
+    jwt_secret: str
+
+    # user-service 설정
+    user_service_url: str
+
+    # KBO BASE URL
+    kbo_base_url: str
     
     model_config = { 
         "env_file": ".env",
