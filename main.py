@@ -5,11 +5,13 @@ from typing import List
 
 import sentry_sdk
 import torch
-from fastapi import FastAPI, Request
+
+from fastapi import FastAPI, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from api.match import get_match_info_by_date, get_match_preview_info
 from chat.chat_bot import ask_question
 from config.config import settings
 from simulation.simulate import simulate_game_rag
@@ -155,3 +157,13 @@ async def detect(req: Sentence):
 async def chat_endpoint(req: ChatRequest):
     answer = ask_question(req.question)
     return ChatResponse(answer=answer)
+
+@app.get("/matches")
+def get_matches(date: str = Query(..., description="경기 날짜(YYYY-MM-DD)")):
+    result = get_match_info_by_date(date)
+    return JSONResponse(content=result)
+
+@app.get("/match/{match-id}")
+def get_match_preview(game_id: str = Query(..., description="네이버 경기 ID (예: 20250601HHNC02025)")):
+    result = get_match_preview_info(game_id)
+    return JSONResponse(content=result)
