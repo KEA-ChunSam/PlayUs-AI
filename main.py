@@ -5,16 +5,19 @@ from typing import List
 
 import sentry_sdk
 import torch
-from fastapi import FastAPI, Request
+
+from fastapi import FastAPI, Request, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from api.match import get_match_info_by_date, get_match_preview_info
 from chat.chat_bot import ask_question
 from config.config import settings
 from simulation.simulate import simulate_game_rag
 from utils.model import detect_profanity
 from utils.slack import send_slack_message
+from utils.jwt import get_current_user
 
 
 class UnicornException(Exception):
@@ -92,7 +95,10 @@ async def unicorn_exception_handler(request: Request, exc: Exception):
 
 
 @app.post("/simulate", response_model=SimulationResponse)
-async def simulate(req: SimulationRequest):
+async def simulate(
+    req: SimulationRequest,
+    user: dict = Depends(get_current_user)
+):
     home_players = [player.dict() for player in req.home_players]
     away_players = [player.dict() for player in req.away_players]
 
@@ -106,7 +112,10 @@ async def simulate(req: SimulationRequest):
 
 
 @app.post("/detect")
-async def detect(req: Sentence):
+async def detect(
+    req: Sentence,
+    user: dict = Depends(get_current_user)
+):
     sentence = req.sentence
 
     # 포괄적인 욕설 탐지 정규표현식
@@ -152,6 +161,26 @@ async def detect(req: Sentence):
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(req: ChatRequest):
+async def chat_endpoint(
+    req: ChatRequest,
+    user: dict = Depends(get_current_user)
+):
     answer = ask_question(req.question)
     return ChatResponse(answer=answer)
+
+@app.get("/matches")
+def get_matches(
+    date: str = Query(..., description="경기 날짜(YYYY-MM-DD)"),
+    user: dict = Depends(get_current_user)
+):
+
+    result = get_match_info_by_date(date)
+    return JSONResponse(content=result)
+
+@app.get("/match/{game_id}")
+async def get_match_preview(
+    game_id: str,
+    user: dict = Depends(get_current_user)
+):
+    result = get_match_preview_info(game_id)
+    return JSONResponse(content=result)
