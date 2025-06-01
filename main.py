@@ -177,9 +177,9 @@ def get_matches(
     result = get_match_info_by_date(date)
     return JSONResponse(content=result)
 
-@app.get("/match/{match-id}")
-def get_match_preview(
-    game_id: str = Query(..., description="네이버 경기 ID (예: 20250601HHNC02025)"),
+@app.get("/match/{game_id}")
+async def get_match_preview(
+    game_id: str,
     user: dict = Depends(get_current_user)
 ):
     result = get_match_preview_info(game_id)
