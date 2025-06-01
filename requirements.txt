@@ -11,3 +11,4 @@ accelerate
 langchain_huggingface
 langgraph
 sentry-sdk[fastapi]
+pyjwt[crypto]
