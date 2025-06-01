@@ -26,6 +26,9 @@ class Settings(BaseSettings):
 
     # user-service 설정
     user_service_url: str
+
+    # KBO BASE URL
+    kbo_base_url: str
     
     model_config = { 
         "env_file": ".env",

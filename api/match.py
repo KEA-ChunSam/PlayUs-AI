@@ -1,8 +1,11 @@
 import requests
+from typing import List, Dict, Any
+from config.config import settings
 from utils.db import get_stadium_by_team_name, get_team_id_by_name, get_match_id_by_teams_and_date
 
+base_url = settings.kbo_base_url
+
 def get_match_info_by_date(date: str) -> List[Dict[str, Any]]:
-    base_url = "https://api-gw.sports.naver.com/schedule/games"
     params = {
         "fields": "basic,schedule,baseball",
         "upperCategoryId": "kbaseball",
@@ -43,7 +46,7 @@ def _process_game_info(game: Dict[str, Any]) -> Dict[str, Any]:
     
     return {
         'match_id': match_id,
-        'naver_game_id': game.get('gameId'),
+        'game_id': game.get('gameId'),
         'game_date_time': game_date_time,
         'stadium': stadium,
         'home_team_id': home_team_id,
@@ -57,8 +60,8 @@ def _process_game_info(game: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 def get_match_preview_info(game_id):
-    url = f"https://api-gw.sports.naver.com/schedule/games/{game_id}/preview"
-    response = requests.get(url)
+    url = f"{base_url}/{game_id}/preview"
+    response = requests.get(url, timeout=10)
     if response.status_code == 200:
         data = response.json()
         preview = data.get("result", {}).get("previewData", {})
