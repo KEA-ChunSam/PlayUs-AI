@@ -13,9 +13,9 @@ def verify_token(token: str):
         payload = jwt.decode(token, key, algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
-        HTTPException(status_code=401, detail="Expired token") # 만료된 토큰
+        raise HTTPException(status_code=401, detail="Expired token") # 만료된 토큰
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token") # 잘못된 토큰
+        raise HTTPException(status_code=401, detail="Invalid token") from None # 잘못된 토큰
 
 # 외부 유저 서비스에 블랙리스트 체크 요청
 def is_token_blacklisted(token: str) -> bool:
