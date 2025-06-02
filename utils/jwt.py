@@ -31,11 +31,9 @@ def is_token_blacklisted(token: str) -> bool:
 # 헤더에서 토큰 추출
 def get_token_from_header(request: Request):
     auth_header = request.headers.get("Authorization")
-    print(auth_header)
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="No token in Authorization header")
     token = auth_header.split(" ", 1)[1]
-    print(token)
     return token
 
 # FastAPI Dependency: 토큰 검증 및 블랙리스트 체크
