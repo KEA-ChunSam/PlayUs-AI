@@ -3,7 +3,7 @@ import jwt
 import requests
 
 from datetime import datetime, timedelta
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Header
 from config.config import settings
 
 # JWT 토큰 검증 함수 (만료/유효성)
@@ -28,16 +28,17 @@ def is_token_blacklisted(token: str) -> bool:
         pass
     return True  # 실패 시 안전하게 막음
 
-# 쿠키에서 토큰 추출
-def get_token_from_cookie(request: Request):
-    token = request.cookies.get("Access")
-    if not token:
-        raise HTTPException(status_code=401, detail="No token in cookie")
+# 헤더에서 토큰 추출
+def get_token_from_header(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="No token in Authorization header")
+    token = auth_header.split(" ", 1)[1]
     return token
 
 # FastAPI Dependency: 토큰 검증 및 블랙리스트 체크
 def get_current_user(request: Request):
-    token = get_token_from_cookie(request)
+    token = get_token_from_header(request)
     if is_token_blacklisted(token):
         raise HTTPException(status_code=401, detail="Blacklisted token")
     payload = verify_token(token)
