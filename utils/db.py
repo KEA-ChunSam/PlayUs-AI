@@ -135,3 +135,40 @@ def get_match_id_by_teams_and_date(home_team_id: int, away_team_id: int, match_d
     except Exception as e:
         logging.error(f"경기 id 조회 실패: {e}")
         return None
+
+def get_pitchers_by_team_id(team_id: int):
+    connection = get_connection()
+    if not connection:
+        return None
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                sql = """
+                SELECT id, name, position, back_num FROM pitcher_info
+                WHERE team_id = %s
+                """
+                cursor.execute(sql, (team_id,))
+                rows = cursor.fetchall()
+                return rows
+    except Exception as e:
+        logging.error(f"투수 선수 정보 조회 실패: {e}")
+        return None
+
+def get_hitters_by_team_id(team_id: int):
+    connection = get_connection()
+    if not connection:
+        return None
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                sql = """
+                SELECT id, name, position, back_num FROM hitter_info
+                WHERE team_id = %s
+                """
+                cursor.execute(sql, (team_id,))
+                rows = cursor.fetchall()
+                return rows
+    except Exception as e:
+        logging.error(f"타자 선수 정보 조회 실패: {e}")
+        return None
+
