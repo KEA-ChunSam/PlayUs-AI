@@ -6,10 +6,12 @@ from typing import List
 import sentry_sdk
 import torch
 
-from fastapi import FastAPI, Request, Query, Depends
+from fastapi import FastAPI, Request, Query, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from fastapi.security import HTTPBearer
+from fastapi.openapi.utils import get_openapi
 
 from api.match import get_match_info_by_date, get_match_preview_info
 from chat.chat_bot import ask_question
@@ -50,6 +52,33 @@ app.add_middleware(
     allow_methods=["*"],                # GET, POST 등 모두 허용
     allow_headers=["*"],                # 모든 헤더 허용
 )
+
+# Swagger에서 JWT Bearer 인증을 사용할 수 있도록 설정
+bearer_scheme = HTTPBearer()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method.setdefault("security", []).append({"bearerAuth": []})
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 
 class PlayerInput(BaseModel):
