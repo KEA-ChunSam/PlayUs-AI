@@ -6,7 +6,7 @@ from typing import List
 import sentry_sdk
 import torch
 
-from fastapi import FastAPI, Request, Query, Depends, Security
+from fastapi import FastAPI, Request, Query, Depends, Security, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -20,6 +20,7 @@ from simulation.simulate import simulate_game_rag
 from utils.model import detect_profanity
 from utils.slack import send_slack_message
 from utils.jwt import get_current_user
+from api.player import get_team_players
 
 
 class UnicornException(Exception):
@@ -213,3 +214,16 @@ async def get_match_preview(
 ):
     result = get_match_preview_info(game_id)
     return JSONResponse(content=result)
+
+@app.get("/team_players")
+def team_players(
+    team_id: int = Query(..., description="팀 ID"),
+    user: dict = Depends(get_current_user)
+):
+    try:
+        result = get_team_players(team_id)
+        if result is None:
+            raise HTTPException(status_code=404, detail="팀 정보를 찾을 수 없습니다.")
+        return JSONResponse(content=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
