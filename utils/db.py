@@ -64,7 +64,7 @@ def get_hitter_info_by_id(player_id: int):
         return None
         
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = "SELECT * FROM hitter_info WHERE id = %s"
                 cursor.execute(sql, (player_id,))
                 return cursor.fetchone()
@@ -78,7 +78,7 @@ def get_pitcher_info_by_id(player_id: int):
         return None
         
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = "SELECT * FROM pitcher_info WHERE id = %s"
                 cursor.execute(sql, (player_id,))
                 return cursor.fetchone()
@@ -91,7 +91,7 @@ def get_stadium_by_team_name(team_name: str):
     if not connection:
         return None
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = "SELECT stadium FROM team WHERE team_name = %s"
                 cursor.execute(sql, (team_name,))
                 row = cursor.fetchone()
@@ -105,7 +105,7 @@ def get_team_id_by_name(team_name: str):
     if not connection:
         return None
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = "SELECT id FROM team WHERE team_name = %s"
                 cursor.execute(sql, (team_name,))
                 row = cursor.fetchone()
@@ -119,7 +119,7 @@ def get_match_id_by_teams_and_date(home_team_id: int, away_team_id: int, match_d
     if not connection:
         return None
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = """
                 SELECT id FROM matches
                 WHERE home_team_id = %s AND away_team_id = %s AND DATE(match_date) = DATE(%s)
@@ -136,7 +136,7 @@ def get_pitchers_by_team_id(team_id: int):
     if not connection:
         return None
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = """
                 SELECT id, name, position, back_num FROM pitcher_info
                 WHERE team_id = %s
@@ -153,7 +153,7 @@ def get_hitters_by_team_id(team_id: int):
     if not connection:
         return None
     try:
-         with connection, connection.cursor() as cursor:
+        with connection, connection.cursor() as cursor:
                 sql = """
                 SELECT id, name, position, back_num FROM hitter_info
                 WHERE team_id = %s
