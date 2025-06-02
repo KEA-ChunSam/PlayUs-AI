@@ -1,6 +1,6 @@
 from utils.db import get_pitchers_by_team_id, get_hitters_by_team_id
 
-def get_team_players(team_id: int):
+def get_team_players(team_id: int) -> dict[str, list[dict]]:
 
     pitchers = get_pitchers_by_team_id(team_id) or []
     hitters = get_hitters_by_team_id(team_id) or []
