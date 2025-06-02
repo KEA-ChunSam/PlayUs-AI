@@ -65,9 +65,9 @@ def get_hitter_info_by_id(player_id: int):
         
     try:
         with connection, connection.cursor() as cursor:
-                sql = "SELECT * FROM hitter_info WHERE id = %s"
-                cursor.execute(sql, (player_id,))
-                return cursor.fetchone()
+            sql = "SELECT * FROM hitter_info WHERE id = %s"
+            cursor.execute(sql, (player_id,))
+            return cursor.fetchone()
     except pymysql.Error as e:
         logging.error("타자 정보 조회 실패: %s", e)
         return None
@@ -79,9 +79,9 @@ def get_pitcher_info_by_id(player_id: int):
         
     try:
         with connection, connection.cursor() as cursor:
-                sql = "SELECT * FROM pitcher_info WHERE id = %s"
-                cursor.execute(sql, (player_id,))
-                return cursor.fetchone()
+            sql = "SELECT * FROM pitcher_info WHERE id = %s"
+            cursor.execute(sql, (player_id,))
+            return cursor.fetchone()
     except pymysql.Error as e:
         logging.error("투수 정보 조회 실패: %s", e)
         return None
@@ -92,10 +92,10 @@ def get_stadium_by_team_name(team_name: str):
         return None
     try:
         with connection, connection.cursor() as cursor:
-                sql = "SELECT stadium FROM team WHERE team_name = %s"
-                cursor.execute(sql, (team_name,))
-                row = cursor.fetchone()
-                return row['stadium'] if row else None
+            sql = "SELECT stadium FROM team WHERE team_name = %s"
+            cursor.execute(sql, (team_name,))
+            row = cursor.fetchone()
+            return row['stadium'] if row else None
     except pymysql.Error as e:
         logging.error("구장 정보 조회 실패: %s", e)
         return None
@@ -106,10 +106,10 @@ def get_team_id_by_name(team_name: str):
         return None
     try:
         with connection, connection.cursor() as cursor:
-                sql = "SELECT id FROM team WHERE team_name = %s"
-                cursor.execute(sql, (team_name,))
-                row = cursor.fetchone()
-                return row['id'] if row else None
+            sql = "SELECT id FROM team WHERE team_name = %s"
+            cursor.execute(sql, (team_name,))
+            row = cursor.fetchone()
+            return row['id'] if row else None
     except pymysql.Error as e:
         logging.error("팀 조회 실패: %s", e)
         return None
@@ -120,13 +120,13 @@ def get_match_id_by_teams_and_date(home_team_id: int, away_team_id: int, match_d
         return None
     try:
         with connection, connection.cursor() as cursor:
-                sql = """
-                SELECT id FROM matches
-                WHERE home_team_id = %s AND away_team_id = %s AND DATE(match_date) = DATE(%s)
-                """
-                cursor.execute(sql, (home_team_id, away_team_id, match_date))
-                row = cursor.fetchone()
-                return row['id'] if row else None
+            sql = """
+            SELECT id FROM matches
+            WHERE home_team_id = %s AND away_team_id = %s AND DATE(match_date) = DATE(%s)
+            """
+            cursor.execute(sql, (home_team_id, away_team_id, match_date))
+            row = cursor.fetchone()
+            return row['id'] if row else None
     except pymysql.Error as e:
         logging.error("경기 조회 실패: %s", e)
         return None
@@ -137,13 +137,13 @@ def get_pitchers_by_team_id(team_id: int):
         return None
     try:
         with connection, connection.cursor() as cursor:
-                sql = """
-                SELECT id, name, position, back_num FROM pitcher_info
-                WHERE team_id = %s
-                """
-                cursor.execute(sql, (team_id,))
-                rows = cursor.fetchall()
-                return rows
+            sql = """
+            SELECT id, name, position, back_num FROM pitcher_info
+            WHERE team_id = %s
+            """
+            cursor.execute(sql, (team_id,))
+            rows = cursor.fetchall()
+            return rows
     except pymysql.Error as e:
         logging.error("투수 선수 정보 조회 실패: %s", e)
         return None
@@ -154,13 +154,13 @@ def get_hitters_by_team_id(team_id: int):
         return None
     try:
         with connection, connection.cursor() as cursor:
-                sql = """
-                SELECT id, name, position, back_num FROM hitter_info
-                WHERE team_id = %s
-                """
-                cursor.execute(sql, (team_id,))
-                rows = cursor.fetchall()
-                return rows
+            sql = """
+            SELECT id, name, position, back_num FROM hitter_info
+            WHERE team_id = %s
+            """
+            cursor.execute(sql, (team_id,))
+            rows = cursor.fetchall()
+            return rows
     except pymysql.Error as e:
         logging.error("타자 선수 정보 조회 실패: %s", e)
         return None
