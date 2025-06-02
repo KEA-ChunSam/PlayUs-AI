@@ -6,7 +6,7 @@ from typing import List
 import sentry_sdk
 import torch
 
-from fastapi import FastAPI, Request, Query, Depends, Security, HTTPException
+from fastapi import FastAPI, Request, Query, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -226,4 +226,4 @@ def team_players(
             raise HTTPException(status_code=404, detail="팀 정보를 찾을 수 없습니다.")
         return JSONResponse(content=result)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
