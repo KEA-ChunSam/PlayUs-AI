@@ -43,8 +43,8 @@ if settings.sentry_environment in ["prod", "dev"]:
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # 로컬 React 앱
-    # "https://yourfrontend.com"  # 배포 후 실제 주소도 추가 가능
+    "http://localhost:3000",  
+    "https://web.playus.o-r.kr" 
 ]
 app.add_middleware(
     CORSMiddleware,
