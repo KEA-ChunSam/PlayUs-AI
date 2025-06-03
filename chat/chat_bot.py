@@ -130,6 +130,8 @@ CREATE TABLE matches (
     away_score INT,
     start_time TIME
 );
+
+
 """
 
 # Few-shot 예제들
@@ -152,6 +154,9 @@ A: SELECT name, W FROM pitcher_info WHERE W >= 10;
 
 Q: 홈런 20개 이상인 선수들은?
 A: SELECT name, HR FROM hitter_info WHERE HR >= 20;
+
+Q: 2025년 5월 27일 경기 정보를 알려줘.
+A: SELECT * FROM matches where match_date = '2025-05-27';
 
 Q: "디아즈의 기록을 알려줘"
 Query Result: [["54400", "디아즈", "0.304", "52", "222", "204", "31", "62", "12", "0", "18", "55", "0", "2", "2", "2025"]]
@@ -335,7 +340,13 @@ class SQLAgent:
         
         # 재시도를 위한 상태 초기화
         return {
-            "question": state['question']
+            "question": state['question'],
+            # "sql_query": None,
+            # "cleaned_sql": None,
+            # "query_result": None,
+            # "final_answer": "",
+            # "error_message": None,
+            # "retry_count": retry_count
         }
     
     # 조건부 라우팅 함수들
@@ -483,11 +494,27 @@ SELECT"""
 
         사용자 질문: {question}
         컬럼 설명: {COLUMN_DESCRIPTIONS}
+        만약 matches 테이블을 이용해서 결과를 받아오면
+            -team_id
+            "1": "KIA", 
+            "2": "삼성", 
+            "3": "LG", 
+            "4": "두산",
+            "5": "KT", 
+            "6": "SSG", 
+            "7": "롯데", 
+            "8": "한화",
+            "9": "NC", 
+            "10": "키움"
+        를 참고해주세요.
         쿼리 결과: {result}
 
         Based on the above information, please write a natural and accurate Korean response to the user’s question.
         If the question is about player statistics, please use the column names in your answer.
         The column names are in the same order as the query results, so please refer to them when creating responses about player statistics.
+
+        
+        
 
         <|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
