@@ -291,8 +291,6 @@ class SQLAgent:
                     "final_answer": "데이터 조회 중 오류가 발생했습니다."
                 }
             
-            # 먼저 간단한 답변 생성 시도
-            
             # LLM 답변 시도
             try:
                 llm_answer = self._generate_natural_answer_with_llm(
@@ -340,13 +338,7 @@ class SQLAgent:
         
         # 재시도를 위한 상태 초기화
         return {
-            "question": state['question'],
-            # "sql_query": None,
-            # "cleaned_sql": None,
-            # "query_result": None,
-            # "final_answer": "",
-            # "error_message": None,
-            # "retry_count": retry_count
+            "question": state['question']
         }
     
     # 조건부 라우팅 함수들
@@ -512,9 +504,6 @@ SELECT"""
         Based on the above information, please write a natural and accurate Korean response to the user’s question.
         If the question is about player statistics, please use the column names in your answer.
         The column names are in the same order as the query results, so please refer to them when creating responses about player statistics.
-
-        
-        
 
         <|eot_id|><|start_header_id|>assistant<|end_header_id|>
 
