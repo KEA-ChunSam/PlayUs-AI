@@ -486,6 +486,7 @@ SELECT"""
 
         사용자 질문: {question}
         컬럼 설명: {COLUMN_DESCRIPTIONS}
+        쿼리 결과: {result}
         만약 matches 테이블을 이용해서 결과를 받아오면
             -team_id
             "1": "KIA", 
@@ -499,7 +500,7 @@ SELECT"""
             "9": "NC", 
             "10": "키움"
         를 참고해주세요.
-        쿼리 결과: {result}
+        
 
         Based on the above information, please write a natural and accurate Korean response to the user’s question.
         If the question is about player statistics, please use the column names in your answer.
@@ -510,7 +511,7 @@ SELECT"""
         """
         
         try:
-            inputs = tokenizer(answer_prompt, return_tensors="pt", truncation=True, max_length=1024)
+            inputs = tokenizer(answer_prompt, return_tensors="pt", truncation=True, max_length=2048)
             inputs = {k: v.to(model.device) for k, v in inputs.items()}
             
             with torch.no_grad():
