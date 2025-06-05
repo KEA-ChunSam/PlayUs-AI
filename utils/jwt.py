@@ -21,7 +21,7 @@ def verify_token(token: str):
 def is_token_blacklisted(token: str) -> bool:
     url = f"{settings.user_service_url}/user/api/token/blacklist-check"
     try:
-        resp = requests.post(url, json={"token": token}, timeout=2)
+        resp = requests.post(url, json={"token": token}, timeout=2, verify=False)
         if resp.status_code == 200:
             return resp.json().get("blacklisted", False)
     except Exception:
