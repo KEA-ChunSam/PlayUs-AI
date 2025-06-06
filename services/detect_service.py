@@ -24,7 +24,7 @@ def detect_profanity_service(sentence: str):
                 "isCurse": parsed.get("isCurse", False),
                 "words": parsed.get("words", [])
             }
-        except:
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
             clean_result = {"isCurse": False, "words": []}
     else:
         clean_result = {"isCurse": False, "words": []}
