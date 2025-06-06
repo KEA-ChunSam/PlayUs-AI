@@ -1,5 +1,11 @@
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import JSONResponse
+from utils.jwt import get_current_user
+from api.match import get_match_info_by_date, get_match_preview_info
 from datetime import datetime
 from fastapi import HTTPException
+
+router = APIRouter()
 
 @router.get("/matches")
 def get_matches(
@@ -15,7 +21,7 @@ def get_matches(
         )
     result = get_match_info_by_date(date)
     return JSONResponse(content=result)
-
+    
 @router.get("/match/{game_id}")
 def get_match_preview(game_id: str, user: dict = Depends(get_current_user)):
     result = get_match_preview_info(game_id)
