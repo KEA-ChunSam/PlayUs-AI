@@ -12,7 +12,6 @@ from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from fastapi.openapi.utils import get_openapi
 
-from api.match import get_match_info_by_date, get_match_preview_info
 from config.config import settings
 from utils.slack import send_slack_message
 from routers import simulation, detect, chat, match, team
@@ -43,8 +42,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Swagger에서 JWT Bearer 인증을 사용할 수 있도록 설정
